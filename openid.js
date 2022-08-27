@@ -67,6 +67,11 @@ openid.RelyingParty.prototype.verifyAssertion = function(requestOrUrl, returnUrl
   openid.verifyAssertion(requestOrUrl, returnUrl, callback, this.stateless, this.extensions, this.strict);
 }
 
+openid.RelyingParty.prototype._verifyAssertionData = function(params, callback)
+{
+  openid._verifyAssertionData(params, callback, this.stateless, this.extensions, this.strict);
+}
+
 
 
 var _btwoc = function(i)
@@ -912,7 +917,7 @@ openid.verifyAssertion = function(requestOrUrl, originalReturnUrl, callback, sta
         
         requestOrUrl.on('end', function() {
           var params = querystring.parse(data);
-          return _verifyAssertionData(params, callback, stateless, extensions, strict);
+          return openid._verifyAssertionData(params, callback, stateless, extensions, strict);
         });
       }
       else {
@@ -933,7 +938,7 @@ openid.verifyAssertion = function(requestOrUrl, originalReturnUrl, callback, sta
   if (!_verifyReturnUrl(assertionUrl, originalReturnUrl)) {
       return callback({ message: 'Invalid return URL' });
   }
-  return _verifyAssertionData(params, callback, stateless, extensions, strict);
+  return openid._verifyAssertionData(params, callback, stateless, extensions, strict);
 }
 
 var _verifyReturnUrl = function (assertionUrl, originalReturnUrl) {
@@ -968,7 +973,7 @@ var _verifyReturnUrl = function (assertionUrl, originalReturnUrl) {
   return true;
 }
 
-var _verifyAssertionData = function(params, callback, stateless, extensions, strict) {
+openid._verifyAssertionData = function(params, callback, stateless, extensions, strict) {
   var assertionError = _getAssertionError(params);
   if(assertionError)
   {
