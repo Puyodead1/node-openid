@@ -53,11 +53,10 @@ var extensions = [new openid.UserInterface(),
                       })];
 
 var relyingParty = new openid.RelyingParty(
-    'http://example.com/verify', // Verification URL (yours)
     null, // Realm (optional, specifies realm for OpenID authentication)
-    false, // Use stateless verification
-    false, // Strict mode
-    extensions); // List of extensions to enable and include
+    true, // Use stateless verification
+    true, // Strict mode
+    []); // List of extensions to enable and include
 
 
 var server = require('http').createServer(
@@ -71,7 +70,7 @@ var server = require('http').createServer(
           var identifier = query.openid_identifier;
 
           // Resolve identifier, associate, and build authentication URL
-          relyingParty.authenticate(identifier, false, function(error, authUrl)
+          relyingParty.authenticate(identifier, 'http://localhost:8081/verify', false, function(error, authUrl)
           {
             if(error)
             {
@@ -94,7 +93,7 @@ var server = require('http').createServer(
         {
           // Verify identity assertion
           // NOTE: Passing just the URL is also possible
-          relyingParty.verifyAssertion(req, function(error, result)
+          relyingParty.verifyAssertion(req, 'http://localhost:8081/verify', function(error, result)
           {
             res.writeHead(200, { 'Content-Type' : 'text/plain; charset=utf-8' });
 
@@ -126,4 +125,4 @@ var server = require('http').createServer(
                 + '</form></body></html>');
         }
     });
-server.listen(80);
+server.listen(8081);

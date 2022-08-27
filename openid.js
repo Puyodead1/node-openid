@@ -48,24 +48,23 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-openid.RelyingParty = function(returnUrl, realm, stateless, strict, extensions)
+openid.RelyingParty = function(realm, stateless, strict, extensions)
 {
-  this.returnUrl = returnUrl;
   this.realm = realm || null;
   this.stateless = stateless;
   this.strict = strict;
   this.extensions = extensions;
 }
 
-openid.RelyingParty.prototype.authenticate = function(identifier, immediate, callback)
+openid.RelyingParty.prototype.authenticate = function(identifier, returnUrl, immediate, callback)
 {
-  openid.authenticate(identifier, this.returnUrl, this.realm, 
+  openid.authenticate(identifier, returnUrl, this.realm, 
       immediate, this.stateless, callback, this.extensions, this.strict);
 }
 
-openid.RelyingParty.prototype.verifyAssertion = function(requestOrUrl, callback)
+openid.RelyingParty.prototype.verifyAssertion = function(requestOrUrl, returnUrl, callback)
 {
-  openid.verifyAssertion(requestOrUrl, this.returnUrl, callback, this.stateless, this.extensions, this.strict);
+  openid.verifyAssertion(requestOrUrl, returnUrl, callback, this.stateless, this.extensions, this.strict);
 }
 
 
