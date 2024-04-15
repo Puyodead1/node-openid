@@ -43,19 +43,28 @@ test('Empty identifier', () => {
     });
 });
 
-// 2016-09-09: XRI.net certificate has expired as of 2016-08-15, 
-// so disable this test for now.
+// // 2016-09-09: XRI.net certificate has expired as of 2016-08-15, 
+// // so disable this test for now.
 
-// test('Resolve =ryan XRI', () => {
-//   openid.discover('=ryan',
-//     true,
-//     (error, providers) => {
-//       expect(!error).toBe(true);
-//       expect(providers.length).toBe(2);
-//     });
-// });
+// // test('Resolve =ryan XRI', () => {
+// //   openid.discover('=ryan',
+// //     true,
+// //     (error, providers) => {
+// //       expect(!error).toBe(true);
+// //       expect(providers.length).toBe(2);
+// //     });
+// // });
 
-test('Resolve login.ubuntu.com', () => {
+test('Resolve Steam', () => {
+  openid.discover('https://steamcommunity.com/openid/',
+    true,
+    (error, providers) => {
+      expect(error).toBeFalsy();
+      expect(providers.length).toBe(1);
+    });
+});
+
+test('Resolve https://login.ubuntu.com', () => {
   openid.discover('https://login.ubuntu.com',
     true,
     (error, providers) => {
@@ -73,22 +82,28 @@ test('Resolve LiveJournal user', () => {
     });
 });
 
-test('Resolve OpenID 1.1 provider', () => {
-  // FIXME: relying on a third party for back-level protocol support is brittle.
-  openid.discover('http://pupeno.com/',
-    true,
-    (error, providers) => {
-      expect(error).toBeFalsy();
-      expect(providers.length).toBe(1);
-      expect(providers[0].version).toBe('http://openid.net/signon/1.1');
-    });
-});
+// 2023-11-12: This OpenID 1.1 provider seems to have gone away,
+// so disable this test for now.
+// test('Resolve OpenID 1.1 provider', done => {
+//   // FIXME: relying on a third party for back-level protocol support is brittle.
+//   openid.discover('http://pupeno.com/',
+//     true,
+//     (error, providers) => {
+//       expect(error).toBeFalsy();
+//       expect(providers).not.toBeNull();
+//       expect(providers).toHaveLength(1);
+//       expect(providers[0].version).toBe('http://openid.net/signon/1.1');
+//       done();
+//     });
+// });
 
-const performAssociation = (url, version) => {
+const performAssociation = (url, version, done) => {
   openid.discover(url,
     true,
     (error, providers) => {
       expect(error).toBeFalsy();
+      expect(providers).not.toBeNull();
+      expect(providers).toHaveLength(1);
       const provider = providers[0];
       openid.associate(provider, (error, result) => {
         expect(error).toBeFalsy();
@@ -96,42 +111,46 @@ const performAssociation = (url, version) => {
           expect(provider.version).toBe(version);
         }
         expect(result.expires_in).toBeTruthy();
+        done();
       });
     }
   );
 }
 
-test('Associate with https://login.ubuntu.com', () => {
-  performAssociation('https://login.ubuntu.com');
+test('Associate with https://login.ubuntu.com', done => {
+  performAssociation('https://login.ubuntu.com',null, done);
 });
 
-test('Associate with http://omnifarious.livejournal.com/', () => {
-  performAssociation('http://omnifarious.livejournal.com/');
+test('Associate with http://omnifarious.livejournal.com/', done => {
+  performAssociation('http://omnifarious.livejournal.com/', null, done);
 });
-test('Associate with https://matt.wordpress.com/', () => {
+
+test('Associate with https://matt.wordpress.com/', done => {
   // FIXME: relying on a third party for back-level protocol support is brittle.
-  performAssociation('https://matt.wordpress.com/', 'http://openid.net/signon/1.1', test);
+  performAssociation('https://matt.wordpress.com/', 'http://openid.net/signon/1.1', done);
 });
 
-test('Immediate authentication with https://login.ubuntu.com', () => {
+test('Immediate authentication with https://login.ubuntu.com', done => {
   openid.authenticate('https://login.ubuntu.com', 
   'http://example.com/verify', null, true, false, 
   (error, url) => {
     expect(error).toBeFalsy();
     expect(url.indexOf('checkid_immediate')).not.toBe(-1);
+    done();
   });
 });
 
-test('Setup authentication with https://login.ubuntu.com', () => {
+test('Setup authentication with https://login.ubuntu.com', done => {
   openid.authenticate('https://login.ubuntu.com', 
   'http://example.com/verify', null, false, false, 
   (error, url) => {
     expect(error).toBeFalsy();
     expect(url.indexOf('checkid_setup')).not.toBe(-1);
+    done();
   });
 });
 
-test('Setup authentication with https://login.ubuntu.com using RelyingParty object', () => {
+test('Setup authentication with https://login.ubuntu.com using RelyingParty object', done => {
   const rp = new openid.RelyingParty(
       'http://example.com/verify',
       null,
@@ -142,5 +161,6 @@ test('Setup authentication with https://login.ubuntu.com using RelyingParty obje
   (error, url) => {
     expect(error).toBeFalsy();
     expect(url.indexOf('checkid_setup')).not.toBe(-1);
+    done();
   });
 });
